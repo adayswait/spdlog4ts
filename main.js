@@ -54,9 +54,10 @@ class BasicLogger extends Logger {
 }
 
 class StdoutLogger extends BasicLogger {
-    constructor(name, path) {
-        super(name, Logger.EType.STDOUT, path);
+    constructor(name) {
+        super(name || `log${StdoutLogger._logID++}`, Logger.EType.STDOUT, "");
     }
+    static _logID = 0;
 }
 
 class AsyncLogger extends BasicLogger {
