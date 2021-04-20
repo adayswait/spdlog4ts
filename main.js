@@ -6,5 +6,8 @@ Logger.info('info');
 Logger.debug('debug');
 Logger.trace('trace');
 
-let logger = new Logger(Logger.TYPE.DAILY, './logs/test222.log')
-logger.info("testing")
+let logger = new Logger("match",Logger.EType.HOURLY, './logs/test222.log')
+logger.info("test1")
+logger.pattern=">>>>>>>>> %H:%M:%S %z %v <<<<<<<<<"
+logger.info("test2")
+Logger.info(`level:${logger.level}`)

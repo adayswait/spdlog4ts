@@ -4,7 +4,7 @@
 #include <napi.h>
 #include <spdlog/spdlog.h>
 
-enum class SINKTYPE
+enum class ESink
 {
     STDOUT,
     ASYNC,
@@ -36,13 +36,14 @@ private:
     static Napi::Value InfoStatic(const Napi::CallbackInfo &info);
     static Napi::Value DebugStatic(const Napi::CallbackInfo &info);
     static Napi::Value TraceStatic(const Napi::CallbackInfo &info);
+    static void FlushEvery(const Napi::CallbackInfo &info);
 
     Napi::Value GetLevel(const Napi::CallbackInfo &info);
     void SetLevel(const Napi::CallbackInfo &info, const Napi::Value &value);
-    Napi::Value Flush(const Napi::CallbackInfo &info);
-    Napi::Value Drop(const Napi::CallbackInfo &info);
+    void Flush(const Napi::CallbackInfo &info);
+    void FlushOn(const Napi::CallbackInfo &info);
+
     void SetPattern(const Napi::CallbackInfo &info, const Napi::Value &value);
-    Napi::Value ClearFormatters(const Napi::CallbackInfo &info);
 
     std::shared_ptr<spdlog::logger> _logger;
 };

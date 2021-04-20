@@ -2,33 +2,46 @@
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/daily_file_sink.h"
+#include "spdlog/sinks/hourly_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 #include <iostream>
 using namespace Napi;
 Napi::Object Logger::Initialize(Napi::Env env, Napi::Object exports)
 {
-    Napi::Object LOGLEVEL = Napi::Object::New(env);
-    LOGLEVEL.Set(Napi::String::New(env, "TRACE"), SPDLOG_LEVEL_TRACE);
-    LOGLEVEL.Set(Napi::String::New(env, "DEBUG"), SPDLOG_LEVEL_DEBUG);
-    LOGLEVEL.Set(Napi::String::New(env, "INFO"), SPDLOG_LEVEL_INFO);
-    LOGLEVEL.Set(Napi::String::New(env, "WARN"), SPDLOG_LEVEL_WARN);
-    LOGLEVEL.Set(Napi::String::New(env, "ERROR"), SPDLOG_LEVEL_ERROR);
-    LOGLEVEL.Set(Napi::String::New(env, "CRITICAL"), SPDLOG_LEVEL_CRITICAL);
-    LOGLEVEL.Set(Napi::String::New(env, "OFF"), SPDLOG_LEVEL_OFF);
+    Napi::Object ELevel = Napi::Object::New(env);
+    ELevel.Set(Napi::String::New(env, "TRACE"), SPDLOG_LEVEL_TRACE);
+    ELevel.Set(Napi::String::New(env, "DEBUG"), SPDLOG_LEVEL_DEBUG);
+    ELevel.Set(Napi::String::New(env, "INFO"), SPDLOG_LEVEL_INFO);
+    ELevel.Set(Napi::String::New(env, "WARN"), SPDLOG_LEVEL_WARN);
+    ELevel.Set(Napi::String::New(env, "ERROR"), SPDLOG_LEVEL_ERROR);
+    ELevel.Set(Napi::String::New(env, "CRITICAL"), SPDLOG_LEVEL_CRITICAL);
+    ELevel.Set(Napi::String::New(env, "OFF"), SPDLOG_LEVEL_OFF);
 
-    Napi::Object LOGTYPE = Napi::Object::New(env);
-    LOGTYPE.Set(Napi::String::New(env, "STDOUT"),
-                static_cast<int>(SINKTYPE::STDOUT));
-    LOGTYPE.Set(Napi::String::New(env, "ASYNC"),
-                static_cast<int>(SINKTYPE::ASYNC));
-    LOGTYPE.Set(Napi::String::New(env, "ROTATING"),
-                static_cast<int>(SINKTYPE::ROTATING));
-    LOGTYPE.Set(Napi::String::New(env, "DAILY"),
-                static_cast<int>(SINKTYPE::DAILY));
-    LOGTYPE.Set(Napi::String::New(env, "HOURLY"),
-                static_cast<int>(SINKTYPE::HOURLY));
+    Napi::Object EType = Napi::Object::New(env);
+    EType.Set(Napi::String::New(env, "STDOUT"),
+              static_cast<int>(ESink::STDOUT));
+    EType.Set(Napi::String::New(env, "ASYNC"),
+              static_cast<int>(ESink::ASYNC));
+    EType.Set(Napi::String::New(env, "ROTATING"),
+              static_cast<int>(ESink::ROTATING));
+    EType.Set(Napi::String::New(env, "DAILY"),
+              static_cast<int>(ESink::DAILY));
+    EType.Set(Napi::String::New(env, "HOURLY"),
+              static_cast<int>(ESink::HOURLY));
     Napi::Function constructor = DefineClass(env, "Logger", {
+        StaticMethod<&Logger::CriticalStatic>("critical"),
+        StaticMethod<&Logger::ErrorStatic>("error"),
+        StaticMethod<&Logger::WarnStatic>("warn"),
+        StaticMethod<&Logger::InfoStatic>("info"),
+        StaticMethod<&Logger::DebugStatic>("debug"),
+        StaticMethod<&Logger::TraceStatic>("trace"),
+        StaticMethod<&Logger::FlushEvery>("flushEvery"),
+
+        StaticValue("ELevel", ELevel),
+        StaticValue("EType", EType),
+
         InstanceMethod<&Logger::Critical>("critical"),
         InstanceMethod<&Logger::Error>("error"),
         InstanceMethod<&Logger::Warn>("warn"),
@@ -36,49 +49,55 @@ Napi::Object Logger::Initialize(Napi::Env env, Napi::Object exports)
         InstanceMethod<&Logger::Debug>("debug"),
         InstanceMethod<&Logger::Trace>("trace"),
         InstanceMethod<&Logger::Flush>("flush"),
-        InstanceMethod<&Logger::Drop>("drop"),
-        InstanceMethod<&Logger::ClearFormatters>("clearFormatters"),
-    
-        StaticValue("LEVEL", LOGLEVEL),
-        StaticValue("TYPE", LOGTYPE),
-        StaticMethod<&Logger::CriticalStatic>("critical"),
-        StaticMethod<&Logger::ErrorStatic>("error"),
-        StaticMethod<&Logger::WarnStatic>("warn"),
-        StaticMethod<&Logger::InfoStatic>("info"),
-        StaticMethod<&Logger::DebugStatic>("debug"),
-        StaticMethod<&Logger::TraceStatic>("trace"),
+        InstanceMethod<&Logger::FlushOn>("flushOn"),
 
         InstanceAccessor<&Logger::GetLevel, &Logger::SetLevel>("level"),
         InstanceAccessor<nullptr, &Logger::SetPattern>("pattern")
     });
     exports.Set("Logger", constructor);
+
     return exports;
 }
 
 Logger::Logger(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Logger>(info)
 {
-    SINKTYPE type = static_cast<SINKTYPE>(
-        info[0].As<Napi::Number>().Int32Value());
-    Napi::String path = info[1].As<Napi::String>();
+    if (info.Length() < 3 ||
+        !info[0].IsString() ||
+        !info[1].IsNumber() ||
+        !info[2].IsString())
+    {
+        NAPI_THROW(Napi::TypeError::New(
+            info.Env(), "parameter logname, logtype, logpath expected"));
+    }
+
+    std::string name = info[0].As<Napi::String>().Utf8Value();
+    ESink type = static_cast<ESink>(
+        info[1].As<Napi::Number>().Int32Value());
+
+    Napi::String path = info[2].As<Napi::String>();
+
     switch (type)
     {
-    case SINKTYPE::STDOUT:
-        _logger = spdlog::stdout_color_st("SINKTYPE::STDOUT");
-        break;
-    case SINKTYPE::ASYNC:
+    case ESink::ASYNC:
         _logger = spdlog::basic_logger_mt<spdlog::async_factory>(
-            "SINKTYPE::ASYNC", path.Utf8Value());
+            name, path.Utf8Value());
         break;
-    case SINKTYPE::ROTATING:
-        // _logger = spdlog::rotating_logger_mt(
-        //     "SINKTYPE::ROTATING", path.Utf8Value(), maxFileSize, maxFiles);
+    case ESink::ROTATING:
+        _logger = spdlog::rotating_logger_mt(
+            name, path.Utf8Value(), 1048576, 100);
         break;
-    case SINKTYPE::DAILY:
-        _logger = spdlog::daily_logger_mt("SINKTYPE::DAILY", path.Utf8Value());
+    case ESink::DAILY:
+        _logger = spdlog::daily_logger_mt(
+            name, path.Utf8Value());
         break;
-    case SINKTYPE::HOURLY:
+    case ESink::HOURLY:
+        _logger = std::make_shared<spdlog::logger>(
+            name, std::make_shared<
+                      spdlog::sinks::hourly_file_sink_mt>(path.Utf8Value()));
         break;
+    case ESink::STDOUT:
     default:
+        _logger = spdlog::stdout_color_st(name);
         break;
     }
 }
@@ -90,14 +109,15 @@ Logger::~Logger()
         return;
     }
 
-    try
-    {
-        spdlog::drop(_logger->name());
-    }
-    catch (...)
-    {
-        // noop
-    }
+    // since spdlog4ts doesn't provide register api,
+    // so there is no need to call spdlog::drop
+    // try
+    // {
+    //     spdlog::drop(_logger->name());
+    // }
+    // catch (...)
+    // {
+    // }
 
     _logger = nullptr;
 }
@@ -235,40 +255,49 @@ Napi::Value Logger::Trace(const Napi::CallbackInfo &info)
 
 Napi::Value Logger::GetLevel(const Napi::CallbackInfo &info)
 {
-    Napi::String v = info[0].As<Napi::String>();
-    std::cout << v << std::endl;
-    Napi::Env env = info.Env();
-    return Napi::Number::New(env, 0);
+    return Napi::Number::New(info.Env(), _logger->level());
 }
 
 void Logger::SetLevel(const Napi::CallbackInfo &info, const Napi::Value &value)
 {
+    if (info.Length() <= 0 || !info[0].IsNumber())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "loglevel expected"));
+    }
+    auto level = info[0].As<Napi::Number>().Int32Value();
+    _logger->set_level(static_cast<spdlog::level::level_enum>(level));
 }
 
-Napi::Value Logger::Flush(const Napi::CallbackInfo &info)
+void Logger::Flush(const Napi::CallbackInfo &info)
 {
-    Napi::String v = info[0].As<Napi::String>();
-    std::cout << v << std::endl;
-    Napi::Env env = info.Env();
-    return Napi::Number::New(env, 0);
+    _logger->flush();
 }
 
-Napi::Value Logger::Drop(const Napi::CallbackInfo &info)
+void Logger::FlushOn(const Napi::CallbackInfo &info)
 {
-    Napi::String v = info[0].As<Napi::String>();
-    std::cout << v << std::endl;
-    Napi::Env env = info.Env();
-    return Napi::Number::New(env, 0);
+    if (info.Length() <= 0 || !info[0].IsNumber())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "loglevel expected"));
+    }
+    auto level = info[0].As<Napi::Number>().Int32Value();
+    _logger->flush_on(static_cast<spdlog::level::level_enum>(level));
+}
+
+void Logger::FlushEvery(const Napi::CallbackInfo &info)
+{
+    if (info.Length() <= 0 || !info[0].IsNumber())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "seconds expected"));
+    }
+    int seconds = info[0].As<Napi::Number>().Int32Value();
+    spdlog::flush_every(std::chrono::seconds(seconds));
 }
 
 void Logger::SetPattern(const Napi::CallbackInfo &info, const Napi::Value &value)
 {
-}
-
-Napi::Value Logger::ClearFormatters(const Napi::CallbackInfo &info)
-{
-    Napi::String v = info[0].As<Napi::String>();
-    std::cout << v << std::endl;
-    Napi::Env env = info.Env();
-    return Napi::Number::New(env, 0);
+    if (info.Length() <= 0 || !info[0].IsString())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "pattern string expected"));
+    }
+    _logger->set_pattern(info[0].As<Napi::String>().Utf8Value());
 }
