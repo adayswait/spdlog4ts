@@ -2,7 +2,7 @@
   "name": "spdlog4ts",
   "version": "0.0.1",
   "description": "Spdlog bindings for Node.JS using TypeScript or EcmaScript",
-  "main": "main.js",
+  "main": "index.js",
   "types": "index.d.ts",
   "repository": {
     "type": "git",
