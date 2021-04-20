@@ -51,41 +51,41 @@ class BasicLogger extends Logger {
         if (messages.length === 0) return;
         Logger.trace(messages.join(' '));
     }
-}
+};
 
 class StdoutLogger extends BasicLogger {
     constructor(name) {
         super(name || `log${StdoutLogger._logID++}`, Logger.EType.STDOUT, "");
     }
     static _logID = 0;
-}
+};
 
 class AsyncLogger extends BasicLogger {
     constructor(name, path) {
         super(name, Logger.EType.ASYNC, path);
     }
-}
+};
 
 class RotatingLogger extends BasicLogger {
     constructor(name, path) {
         super(name, Logger.EType.ROTATING, path);
     }
-}
+};
 
 class DailyLogger extends BasicLogger {
     constructor(name, path) {
         super(name, Logger.EType.DAILY, path);
     }
-}
+};
 
 class HourlyLogger extends BasicLogger {
     constructor(name, path) {
         super(name, Logger.EType.HOURLY, path);
     }
-}
+};
 
-exports.LogLevel = Logger.ELevel;
-exports.LogType = Logger.EType;
+exports.ELevel = Logger.ELevel;
+exports.EType = Logger.EType;
 exports.RawLogger = Logger;
 exports.BasicLogger = BasicLogger;
 exports.StdoutLogger = StdoutLogger;

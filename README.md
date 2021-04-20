@@ -8,28 +8,30 @@
 * ### example
 ```
 const {
-    RawLogger,
+    BasicLogger,
     StdoutLogger,
     AsyncLogger,
     RotatingLogger,
     DailyLogger,
     HourlyLogger,
-    LogLevel
-} = require('./main.js');
+    EType,
+    ELevel
+} = require('./index.js');
 
 // use the default logger (stdout, multi-threaded, colored)
-RawLogger.level = LogLevel.TRACE;
+BasicLogger.level = ELevel.TRACE;
+BasicLogger.critical("critical log");
+BasicLogger.error("error log");
+BasicLogger.warn("warning log");
+BasicLogger.info("info log");
+BasicLogger.pattern = "*** [%H:%M:%S %z] [thread %t] %v ***";
+BasicLogger.debug("debug log");
+BasicLogger.trace("trace log");
 
-RawLogger.critical("critical log");
-RawLogger.error("error log");
-RawLogger.warn("warning log");
-RawLogger.info("info log");
-RawLogger.pattern = "*** [%H:%M:%S %z] [thread %t] %v ***";
-RawLogger.debug("debug log");
-RawLogger.trace("trace log");
+BasicLogger.info(EType.DAILY, EType.HOURLY);
 
 // force all loggers flush to disk every 3 seconds
-RawLogger.flushEvery(3);
+BasicLogger.flushEvery(3);
 
 // create a stdout logger 
 const stdlogger = new StdoutLogger('stdout');
@@ -38,7 +40,7 @@ const stdlogger = new StdoutLogger('stdout');
 stdlogger.pattern = ">>>>>>>>> %H:%M:%S %z %v <<<<<<<<<";
 
 // set log level
-stdlogger.level = LogLevel.TRACE;
+stdlogger.level = ELevel.TRACE;
 stdlogger.trace("stdout logger message");
 
 // create an async logger 
@@ -56,6 +58,6 @@ dailylogger.info("daily logger message");
 
 // create an hourly file logger
 const hourlylogger = new HourlyLogger('hourlyLogger', './logs/hourly.log');
-hourlylogger.info("hourly logger message")
+hourlylogger.info("hourly logger message");
 
 ```
