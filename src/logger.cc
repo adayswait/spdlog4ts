@@ -39,6 +39,10 @@ Napi::Object Logger::Initialize(Napi::Env env, Napi::Object exports)
         StaticMethod<&Logger::TraceStatic>("trace"),
         StaticMethod<&Logger::FlushEvery>("flushEvery"),
 
+        StaticAccessor<&Logger::GetLevelStatic,
+                       &Logger::SetLevelStatic>("level"),
+        StaticAccessor<nullptr, &Logger::SetPatternStatic>("pattern"),
+
         StaticValue("ELevel", ELevel),
         StaticValue("EType", EType),
 
@@ -300,4 +304,30 @@ void Logger::SetPattern(const Napi::CallbackInfo &info, const Napi::Value &value
         NAPI_THROW(Napi::TypeError::New(info.Env(), "pattern string expected"));
     }
     _logger->set_pattern(info[0].As<Napi::String>().Utf8Value());
+}
+
+Napi::Value Logger::GetLevelStatic(const Napi::CallbackInfo &info)
+{
+    return Napi::Number::New(info.Env(), spdlog::default_logger()->level());
+}
+void Logger::SetLevelStatic(const Napi::CallbackInfo &info,
+                            const Napi::Value &value)
+{
+    if (info.Length() <= 0 || !info[0].IsNumber())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "loglevel expected"));
+    }
+    auto level = info[0].As<Napi::Number>().Int32Value();
+    spdlog::default_logger()->set_level(
+        static_cast<spdlog::level::level_enum>(level));
+}
+void Logger::SetPatternStatic(const Napi::CallbackInfo &info,
+                              const Napi::Value &value)
+{
+    if (info.Length() <= 0 || !info[0].IsString())
+    {
+        NAPI_THROW(Napi::TypeError::New(info.Env(), "pattern string expected"));
+    }
+    spdlog::default_logger()->set_pattern(
+        info[0].As<Napi::String>().Utf8Value());
 }

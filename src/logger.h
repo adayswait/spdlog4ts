@@ -36,6 +36,11 @@ private:
     static Napi::Value InfoStatic(const Napi::CallbackInfo &info);
     static Napi::Value DebugStatic(const Napi::CallbackInfo &info);
     static Napi::Value TraceStatic(const Napi::CallbackInfo &info);
+    static Napi::Value GetLevelStatic(const Napi::CallbackInfo &info);
+    static void SetLevelStatic(const Napi::CallbackInfo &info,
+                               const Napi::Value &value);
+    static void SetPatternStatic(const Napi::CallbackInfo &info,
+                                 const Napi::Value &value);
     static void FlushEvery(const Napi::CallbackInfo &info);
 
     Napi::Value GetLevel(const Napi::CallbackInfo &info);

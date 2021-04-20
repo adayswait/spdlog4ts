@@ -19,10 +19,12 @@ const {
 
 // use the default logger (stdout, multi-threaded, colored)
 RawLogger.level = LogLevel.TRACE;
+
 RawLogger.critical("critical log");
 RawLogger.error("error log");
 RawLogger.warn("warning log");
 RawLogger.info("info log");
+RawLogger.pattern = "*** [%H:%M:%S %z] [thread %t] %v ***";
 RawLogger.debug("debug log");
 RawLogger.trace("trace log");
 
@@ -44,7 +46,8 @@ const asynclogger = new AsyncLogger('asynclogger', "./logs/async.log");
 asynclogger.info("async logger message");
 
 // create a rotating file logger 
-const rotatinglogger = new RotatingLogger('rotatinglogger', "./logs/rotating.log");
+const rotatinglogger = new RotatingLogger('rotatinglogger',
+    "./logs/rotating.log");
 rotatinglogger.info("rotating logger message");
 
 // create a daily file logger
