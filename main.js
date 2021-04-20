@@ -1,13 +1,94 @@
 const { Logger } = require('bindings')('spdlog4ts');
-Logger.critical('critical');
-Logger.error('error');
-Logger.warn('warning');
-Logger.info('info');
-Logger.debug('debug');
-Logger.trace('trace');
+class BasicLogger extends Logger {
+    constructor(name, type, path) {
+        super(name, type, path);
+    }
+    critical(...messages) {
+        if (messages.length === 0) return;
+        this.__critical(messages.join(' '));
+    }
+    error(...messages) {
+        if (messages.length === 0) return;
+        this.__error(messages.join(' '));
+    }
+    warn(...messages) {
+        if (messages.length === 0) return;
+        this.__warn(messages.join(' '));
+    }
+    info(...messages) {
+        if (messages.length === 0) return;
+        this.__info(messages.join(' '));
+    }
+    debug(...messages) {
+        if (messages.length === 0) return;
+        this.__debug(messages.join(' '));
+    }
+    trace(...messages) {
+        if (messages.length === 0) return;
+        this.__trace(messages.join(' '));
+    }
+    static critical(...messages) {
+        if (messages.length === 0) return;
+        Logger.critical(messages.join(' '));
+    }
+    static error(...messages) {
+        if (messages.length === 0) return;
+        Logger.error(messages.join(' '));
+    }
+    static warn(...messages) {
+        if (messages.length === 0) return;
+        Logger.warn(messages.join(' '));
+    }
+    static info(...messages) {
+        if (messages.length === 0) return;
+        Logger.info(messages.join(' '));
+    }
+    static debug(...messages) {
+        if (messages.length === 0) return;
+        Logger.debug(messages.join(' '));
+    }
+    static trace(...messages) {
+        if (messages.length === 0) return;
+        Logger.trace(messages.join(' '));
+    }
+}
 
-let logger = new Logger("match",Logger.EType.HOURLY, './logs/test222.log')
-logger.info("test1")
-logger.pattern=">>>>>>>>> %H:%M:%S %z %v <<<<<<<<<"
-logger.info("test2")
-Logger.info(`level:${logger.level}`)
+class StdoutLogger extends BasicLogger {
+    constructor(name, path) {
+        super(name, Logger.EType.STDOUT, path);
+    }
+}
+
+class AsyncLogger extends BasicLogger {
+    constructor(name, path) {
+        super(name, Logger.EType.ASYNC, path);
+    }
+}
+
+class RotatingLogger extends BasicLogger {
+    constructor(name, path) {
+        super(name, Logger.EType.ROTATING, path);
+    }
+}
+
+class DailyLogger extends BasicLogger {
+    constructor(name, path) {
+        super(name, Logger.EType.DAILY, path);
+    }
+}
+
+class HourlyLogger extends BasicLogger {
+    constructor(name, path) {
+        super(name, Logger.EType.HOURLY, path);
+    }
+}
+
+exports.LogLevel = Logger.ELevel;
+exports.LogType = Logger.EType;
+exports.RawLogger = Logger;
+exports.BasicLogger = BasicLogger;
+exports.StdoutLogger = StdoutLogger;
+exports.AsyncLogger = AsyncLogger;
+exports.RotatingLogger = RotatingLogger;
+exports.DailyLogger = DailyLogger;
+exports.HourlyLogger = HourlyLogger;

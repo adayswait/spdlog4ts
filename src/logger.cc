@@ -42,12 +42,12 @@ Napi::Object Logger::Initialize(Napi::Env env, Napi::Object exports)
         StaticValue("ELevel", ELevel),
         StaticValue("EType", EType),
 
-        InstanceMethod<&Logger::Critical>("critical"),
-        InstanceMethod<&Logger::Error>("error"),
-        InstanceMethod<&Logger::Warn>("warn"),
-        InstanceMethod<&Logger::Info>("info"),
-        InstanceMethod<&Logger::Debug>("debug"),
-        InstanceMethod<&Logger::Trace>("trace"),
+        InstanceMethod<&Logger::Critical>("__critical"),
+        InstanceMethod<&Logger::Error>("__error"),
+        InstanceMethod<&Logger::Warn>("__warn"),
+        InstanceMethod<&Logger::Info>("__info"),
+        InstanceMethod<&Logger::Debug>("__debug"),
+        InstanceMethod<&Logger::Trace>("__trace"),
         InstanceMethod<&Logger::Flush>("flush"),
         InstanceMethod<&Logger::FlushOn>("flushOn"),
 

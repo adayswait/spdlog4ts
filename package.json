@@ -1,8 +1,13 @@
 {
   "name": "spdlog4ts",
   "version": "0.0.1",
-  "description": "",
+  "description": "Spdlog bindings for Node.JS using TypeScript or EcmaScript",
   "main": "main.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adayswait/spdlog4ts.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,5 +18,5 @@
   },
   "keywords": [],
   "author": "adayswait",
-  "license": "ISC"
+  "license": "GPL"
 }
