@@ -1,7 +1,7 @@
 {
   "name": "spdlog4ts",
-  "version": "0.1.0",
-  "description": "Spdlog bindings for Node.JS using TypeScript or EcmaScript",
+  "version": "0.1.1",
+  "description": "spdlog bindings for Node.js with built-in TypeScript declarations",
   "main": "index.js",
   "types": "index.d.ts",
   "repository": {
@@ -15,7 +15,8 @@
   },
   "keywords": [
     "spdlog",
-    "napi"
+    "napi",
+    "TypeScript"
   ],
   "author": "adayswait",
   "license": "GPL-3.0-only"
