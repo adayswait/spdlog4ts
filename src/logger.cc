@@ -98,6 +98,7 @@ Logger::Logger(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Logger>(info)
         _logger = std::make_shared<spdlog::logger>(
             name, std::make_shared<
                       spdlog::sinks::hourly_file_sink_mt>(path.Utf8Value()));
+        spdlog::register_logger(_logger);
         break;
     case ESink::STDOUT:
     default:
@@ -113,15 +114,13 @@ Logger::~Logger()
         return;
     }
 
-    // since spdlog4ts doesn't provide register api,
-    // so there is no need to call spdlog::drop
-    // try
-    // {
-    //     spdlog::drop(_logger->name());
-    // }
-    // catch (...)
-    // {
-    // }
+    try
+    {
+        spdlog::drop(_logger->name());
+    }
+    catch (...)
+    {
+    }
 
     _logger = nullptr;
 }
