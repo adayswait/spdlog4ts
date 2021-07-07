@@ -1,6 +1,6 @@
 {
   "name": "spdlog4ts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Spdlog bindings for Node.js with built-in TypeScript declarations",
   "main": "index.js",
   "types": "index.d.ts",

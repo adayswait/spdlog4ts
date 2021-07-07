@@ -107,8 +107,8 @@ const asynclogger = new AsyncLogger('name1', "./logs/async.log");
 asynclogger.info("async logger message");
 
 // create a rotating file logger 
-const rotatinglogger = new RotatingLogger('name2',
-    "./logs/rotating.log");
+const rotatinglogger = new RotatingLogger('name2', "./logs/rotating.log",
+    1024 * 1024 * 100/* 100MB */, 50/* at most 50 files */);
 rotatinglogger.info("rotating logger message");
 
 // create a daily file logger
