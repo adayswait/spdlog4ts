@@ -1,7 +1,7 @@
 const { Logger } = require('bindings')('spdlog4ts');
 class BasicLogger extends Logger {
-    constructor(name, type, path) {
-        super(name, type, path);
+    constructor(name, type, path, rotatingMaxBytes, rotatingMaxFiles) {
+        super(name, type, path, rotatingMaxBytes, rotatingMaxFiles);
     }
     critical(...messages) {
         if (messages.length === 0) return;
@@ -67,8 +67,9 @@ class AsyncLogger extends BasicLogger {
 };
 
 class RotatingLogger extends BasicLogger {
-    constructor(name, path) {
-        super(name, Logger.EType.ROTATING, path);
+    constructor(name, path, rotatingMaxBytes, rotatingMaxFiles) {
+        super(name, Logger.EType.ROTATING, path,
+            rotatingMaxBytes, rotatingMaxFiles);
     }
 };
 

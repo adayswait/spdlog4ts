@@ -87,9 +87,19 @@ Logger::Logger(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Logger>(info)
             name, path.Utf8Value());
         break;
     case ESink::ROTATING:
-        _logger = spdlog::rotating_logger_mt(
-            name, path.Utf8Value(), 1048576, 100);
-        break;
+    {
+        if (info.Length() != 5)
+        {
+            NAPI_THROW(Napi::TypeError::New(info.Env(),
+                "rotating logger needs 5 parameters"));
+        }
+
+        int rotatingMaxBytes = info[3].As<Napi::Number>().Int32Value();
+        int rotatingMaxFiles = info[4].As<Napi::Number>().Int32Value();
+        _logger = spdlog::rotating_logger_mt(name, path.Utf8Value(),
+            rotatingMaxBytes, rotatingMaxFiles);
+    }
+    break;
     case ESink::DAILY:
         _logger = spdlog::daily_logger_mt(
             name, path.Utf8Value());
